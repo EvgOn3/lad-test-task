@@ -1,5 +1,6 @@
-import { makePdf } from './controller'
+import { makePdfAsync } from './controller'
 import Hapi from '@hapi/hapi'
+import fs from 'fs'
 
 const init = async () => {
   const server = Hapi.server({
@@ -10,14 +11,20 @@ const init = async () => {
   server.route({
     method: 'POST',
     path: '/makepdf',
-    handler: (request, h) => {
+    handler: async (request, h) => {
       //Принимает массив вида:
       // [
       //   "https://yandex.ru/",
-      //   "https://www.twitch.tv/",
       //   "https://3dnews.ru/"
       // ]
-      return makePdf(request.payload as Array<string>)
+      try {
+        const pdfBufferResult = await makePdfAsync(
+          request.payload as Array<string>
+        )
+        return h.response(pdfBufferResult).type('application/pdf')
+      } catch (e) {
+        console.log(e)
+      }
     },
   })
   try {
