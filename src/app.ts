@@ -1,5 +1,5 @@
-const { makePdf } = require('./controller')
-const Hapi = require('@hapi/hapi')
+import { makePdf } from './controller'
+import Hapi from '@hapi/hapi'
 
 const init = async () => {
   const server = Hapi.server({
@@ -9,16 +9,15 @@ const init = async () => {
 
   server.route({
     method: 'POST',
-    path: '/makePdf',
+    path: '/makepdf',
     handler: (request, h) => {
-      return makePdf(request.payload)
-    },
-    options: {
-      validate: {
-        payload: async (value, options) => {
-          if (!(value instanceof Array)) throw Error()
-        },
-      },
+      //Принимает массив вида:
+      // [
+      //   "https://yandex.ru/",
+      //   "https://www.twitch.tv/",
+      //   "https://3dnews.ru/"
+      // ]
+      return makePdf(request.payload as Array<string>)
     },
   })
   try {

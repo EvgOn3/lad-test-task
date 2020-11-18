@@ -1,20 +1,21 @@
-const fs = require('fs')
-const axios = require('axios').default
-const validUrl = require('valid-url')
-const { JSDOM } = require('jsdom')
-const { getWordsWithCount, walkOnNodes } = require('./functions')
+import { UrlWordsWithCountDictionary } from './types'
+import fs from 'fs'
+import axios from 'axios'
+import validUrl from 'valid-url'
+import { JSDOM } from 'jsdom'
+import { getWordsWithCount, walkOnNodes } from './functions'
+import pdfGenerator from 'pdfjs'
 
-const makePdf = async function (urls) {
+export const makePdf = async function (urls: Array<string>) {
+  if (!(urls instanceof Array)) throw Error('Incorrect value type')
   const uniUrls = new Set(urls)
   try {
-    let promises = []
-
+    let promises: Array<Promise<UrlWordsWithCountDictionary>> = []
     uniUrls.forEach((url) => {
       if (!validUrl.isUri(url)) return
       promises.push(
         new Promise(async (resolve, reject) => {
           try {
-            if (url === urls[1]) throw Error()
             const body = (await axios.get(url)).data
             const dom = new JSDOM(body)
             let site = dom.window.document.body
@@ -29,17 +30,15 @@ const makePdf = async function (urls) {
     })
 
     const wordsResult = (await Promise.allSettled(promises))
-      .filter((promise) => {
-        return promise.status === 'fulfilled'
-      })
       .map((promise) => {
-        return promise.value
+        if (promise.status === 'fulfilled') return promise.value
       })
+      .filter((promise) => promise)
+
     console.log(wordsResult)
-    return 'Hello World!'
+    var pdf = new pdfGenerator.Document()
+    return pdf
   } catch (e) {
     console.log(e)
   }
 }
-
-module.exports = { makePdf }
