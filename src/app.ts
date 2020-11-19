@@ -1,6 +1,5 @@
 import { makePdfAsync } from './controller'
 import Hapi from '@hapi/hapi'
-import fs from 'fs'
 
 const init = async () => {
   const server = Hapi.server({
@@ -21,7 +20,11 @@ const init = async () => {
         const pdfBufferResult = await makePdfAsync(
           request.payload as Array<string>
         )
-        return h.response(pdfBufferResult).type('application/pdf')
+        return h
+          .response(pdfBufferResult)
+          .type('application/pdf')
+          .charset('utf8')
+          .header('Content-Disposition', 'attachment; filename="pdf.pdf"')
       } catch (e) {
         console.log(e)
       }
@@ -34,10 +37,5 @@ const init = async () => {
     console.log(e)
   }
 }
-
-process.on('unhandledRejection', (err) => {
-  console.log(err)
-  process.exit(1)
-})
 
 init()

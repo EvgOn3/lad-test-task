@@ -16,19 +16,22 @@ const fontFile = fs.readFileSync(fontPath)
  * Объект состоит из слова и счетчика
  */
 export const getWordsWithCount = (nodesContent: Array<string>) => {
-  let words: Array<WordsWithCount> = []
+  let wordsWithCount: Array<WordsWithCount> = []
   nodesContent.forEach((content) => {
-    const tokens = content.split(' ')
-    tokens.forEach((token) => {
-      if (token.length > 4 && token.match(/^[а-яА-ЯёЁ]*$/)) {
-        const foundToken = words.find((f) => f.value === token)
-        if (foundToken) foundToken.count++
-        else words.push({ value: token, count: 0 })
-      }
-    })
+    const enWords = content.match(/\b([\-a-z])+/gi) ?? []
+    const ruWords = content.match(/[-а-я]+/gi) ?? []
+    const words = enWords.concat(ruWords)
+    if (words != null)
+      words.forEach((token) => {
+        token = token.trim()
+        if (token.length > 4) {
+          const foundToken = wordsWithCount.find((f) => f.value === token)
+          if (foundToken) foundToken.count++
+          else wordsWithCount.push({ value: token, count: 1 })
+        }
+      })
   })
-
-  return words
+  return wordsWithCount
 }
 
 /**
@@ -42,7 +45,11 @@ export const walkOnNodes = (element: Element) => {
       for (let index = 0; index < element.children.length; index++) {
         reDom(element.children[index])
       }
-    } else if (element.textContent) {
+    } else if (
+      element.textContent &&
+      element.nodeName != 'SCRIPT' &&
+      element.nodeName != 'STYLE'
+    ) {
       nodesContent.push(element.textContent)
     }
   }
@@ -52,7 +59,7 @@ export const walkOnNodes = (element: Element) => {
 
 /**
  * Генерируем и заполняем pdf
- * и возвращаем в виде буффера
+ * и возвращаем в виде буфера
  */
 export const generatePdfResult = async (
   urlsResult: Array<UrlWordsWithCountDictionary>
