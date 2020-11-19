@@ -23,8 +23,11 @@ const init = async () => {
         return h
           .response(pdfBufferResult)
           .type('application/pdf')
-          .charset('utf8')
-          .header('Content-Disposition', 'attachment; filename="pdf.pdf"')
+          .encoding('binary')
+          .header(
+            'Content-Disposition',
+            'attachment; filename="pdf_response.pdf"'
+          )
       } catch (e) {
         console.log(e)
       }

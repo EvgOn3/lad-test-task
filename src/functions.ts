@@ -8,6 +8,7 @@ import {
 } from './types'
 
 //Загружаем шрифты 1 раз при запуске приложения
+//Внешние шрифты нужны для поддержки русского языка
 const fontPath = path.resolve(__dirname, 'open-sans.ttf')
 const fontFile = fs.readFileSync(fontPath)
 
